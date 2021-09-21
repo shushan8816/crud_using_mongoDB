@@ -30,119 +30,119 @@ app.post('/users', (req, res) => {
         res.send("Data saved")
     });
 });
-    app.get('/users', (req, res) => {
+app.get('/users', (req, res) => {
 
-        User.find({}, function (err, docs) {
-            if (err) {
-                res.send(err)
-            }
-            res.send(docs)
-        });
-    });
-
-    app.get('/user/:id', (req, res) => {
-        const id = req.params.id;
-        User.findById(id, function (err, doc) {
-            if (err) {
-                res.send(err)
-            }
-            res.send(doc)
-        });
-    });
-
-    app.put('/user/:id', (req, res) => {
-        const newUser = {
-            name: req.body.name,
-            age: req.body.age
+    User.find({}, function (err, docs) {
+        if (err) {
+            res.send(err)
         }
-        const id = req.body.id;
-        User.findByIdAndUpdate(id, newUser, function (err, user) {
-            if (err) {
-                res.send(err)
-            }
-            res.send(user)
-        });
+        res.send(docs)
+    });
+});
+
+app.get('/user/:id', (req, res) => {
+    const id = req.params.id;
+    User.findById(id, function (err, doc) {
+        if (err) {
+            res.send(err)
+        }
+        res.send(doc)
+    });
+});
+
+app.put('/user/:id', (req, res) => {
+    const newUser = {
+        name: req.body.name,
+        age: req.body.age
+    }
+    const id = req.body.id;
+    User.findByIdAndUpdate(id, newUser, function (err, user) {
+        if (err) {
+            res.send(err)
+        }
+        res.send(user)
+    });
+});
+
+app.delete('/user/:id', (req, res) => {
+    const id = req.params.id;
+    User.findByIdAndDelete(id, function (err, doc) {
+        if (err) {
+            res.send(err)
+        }
+        res.send(doc)
+    });
+});
+
+
+const PostSchema = new schema({
+    title: String,
+    description: String,
+    user_id: schema.Types.ObjectId
+});
+
+const Post = mongoose.model('post', PostSchema)
+
+app.post('/posts', (req, res) => {
+
+    const post = new Post({
+        title: req.body.title,
+        description: req.body.description,
+        userID: schema.Types.ObjectId
     });
 
-    app.delete('/user/:id', (req, res) => {
-        const id = req.body.id;
-        User.findByIdAndDelete(id, function (err, doc) {
-            if (err) {
-                res.send(err)
-            }
-            res.send(doc)
-        });
+    post.save().then(post => {
+            res.send(post);
+        }, (err) => {
+            res.status(400).send(err);
+        }
+    );
+});
+
+app.get('/post/:id', (req, res) => {
+
+    const id = req.params.userID;
+    Post.findById(id, function (err, doc) {
+        if (err) {
+            res.send(err)
+        }
+        res.send(doc)
     });
+});
 
-
-    const PostSchema = new schema({
-        title: String,
-        description: String,
-        user_id: schema.Types.ObjectId
+app.put('/post/:id', (req, res) => {
+    const newPost = new Post({
+        title: req.body.title,
+        description: req.body.description,
+        userID: schema.Types.ObjectId
     });
-
-    const Post = mongoose.model('post', PostSchema)
-
-    app.post('/posts', (req, res) => {
-
-        const post = new Post({
-            title: req.body.title,
-            description: req.body.description,
-            userID: schema.Types.ObjectId
-        });
-
-        post.save().then(post => {
-                res.send(post);
-            }, (err) => {
-                res.status(400).send(err);
-            }
-        );
+    const post_id = req.params.id;
+    const userID = schema.Types.ObjectId
+    Post.findByIdAndUpdate(post_id, newPost, function (err, doc) {
+        if (err) {
+            res.send(err)
+        }
+        if (doc.userID.toString() !== userID.toString()) {
+            res.send('Only the author/user of this post can update it!')
+        }
+        res.send(doc)
     });
+});
 
-    app.get('/post/:id', (req, res) => {
+app.delete('/post/:id', (req, res) => {
 
-        const id = req.params.userID;
-        Post.findById(id, function (err, doc) {
-            if (err) {
-                res.send(err)
-            }
-            res.send(doc)
-        });
+    const post_id = req.params.id;
+    const userID = schema.Types.ObjectId
+    Post.findByIdAndDelete(post_id, function (err, post) {
+        if (err) {
+            res.send(err)
+        }
+        if (post.userID.toString() !== userID.toString()) {
+            res.send('Only the author/user of this post can delete it!')
+        }
+        res.send(post)
     });
-
-    app.put('/post/:id', (req, res) => {
-        const newPost = new Post({
-            title: req.body.title,
-            description: req.body.description,
-            userID: schema.Types.ObjectId
-        });
-        const post_id = req.params.id;
-        const userID = schema.Types.ObjectId
-        Post.findByIdAndUpdate(post_id, newPost, function (err, doc) {
-            if (err) {
-                res.send(err)
-            }
-            if (doc.userID.toString() !== userID.toString()) {
-                res.send('Only the author/user of this post can update it!')
-            }
-            res.send(doc)
-        });
-    });
-
-    app.delete('/post/:id', (req, res) => {
-
-        const post_id = req.params.id;
-        const userID = schema.Types.ObjectId
-        Post.findByIdAndDelete(post_id, function (err, post) {
-            if (err) {
-                res.send(err)
-            }
-            if (post.userID.toString() !== userID.toString()) {
-                res.send('Only the author/user of this post can delete it!')
-            }
-            res.send(post)
-        });
-    });
+});
 
 
 const port = 4000;
