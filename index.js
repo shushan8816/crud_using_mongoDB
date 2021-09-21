@@ -32,21 +32,21 @@ app.post('/users', (req, res) => {
 });
     app.get('/users', (req, res) => {
 
-        User.find({}, function (err, users) {
+        User.find({}, function (err, docs) {
             if (err) {
                 res.send(err)
             }
-            res.send(users)
+            res.send(docs)
         });
     });
 
     app.get('/user/:id', (req, res) => {
-        const id = req.body.id;
-        User.findById(id, function (err, user) {
+        const id = req.params.id;
+        User.findById(id, function (err, doc) {
             if (err) {
                 res.send(err)
             }
-            res.send(user)
+            res.send(doc)
         });
     });
 
